@@ -23,4 +23,5 @@ window.addEventListener("keydown", event => {
     if (menu.open) menu.close();
     else { menu.showModal(); syncMods(); }
 }, true);
-setInterval(() => { if (menu.open) syncMods(); }, 250);
+// Picks up choices made while Unity was loading, even if the menu is closed.
+setInterval(syncMods, 250);
