@@ -1,0 +1,10 @@
+#mods { position:fixed; inset:16px 16px auto auto; margin:0; box-sizing:border-box; width:min(320px,90vw); padding:20px; border:1px solid #6b8ca4; border-radius:16px; background:#102535; color:#f3faff; box-shadow:0 12px 36px #00142366; font:16px/1.45 system-ui,sans-serif; }
+#mods::backdrop { background:transparent; }
+#mods header, #mods label, #mods footer { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+#mods h1 { margin:0; font-size:23px; }
+#mods header { margin-bottom:10px; }
+#mods button,#mods select,#mods kbd { border:1px solid #638297; background:#203c50; color:inherit; border-radius:6px; padding:4px 8px; }
+#mods button { cursor:pointer; font-size:18px; }
+#mods label { padding:12px 0; border-bottom:1px solid #385366; }
+#mods input { width:20px; height:20px; accent-color:#5ee3d2; }
+#mods footer { margin-top:14px; font-size:13px; color:#b9dfed; }
