@@ -25,7 +25,16 @@
     </div>
     <dialog id="mods" aria-labelledby="mods-title">
         <header><h1 id="mods-title">Sled mods</h1><button id="close-mods" aria-label="Close mod menu">×</button></header>
-        <label>God mode <input id="shield" type="checkbox"></label>
+        <form id="stats">
+            <fieldset disabled>
+                <legend>Saved stats</legend>
+                <label>Presents <input id="gifts" type="number" min="0" max="2147483646" step="1" required></label>
+                <label>Rounds played <input id="plays" type="number" min="0" max="2147483646" step="1" required></label>
+                <label>High score <input id="best" type="number" min="0" max="2147483646" step="1" required></label>
+                <button type="submit">Save stats</button>
+            </fieldset>
+            <output id="status" aria-live="polite"></output>
+        </form>
         <label>Score multiplier <select id="points"><option value="1">1×</option><option value="3">3×</option><option value="10">10×</option></select></label>
         <label>Goggles <select id="goggles"><option value="none">Clear</option><option value="sepia(.8) saturate(1.5)">Amber</option><option value="hue-rotate(105deg) saturate(1.6)">Aurora</option></select></label>
         <footer><output id="saves">Loading game…</output><kbd>R</kbd></footer>

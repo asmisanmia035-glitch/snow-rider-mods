@@ -28,10 +28,18 @@ function patchSnowRider(binary) {
     resize(0x14f1d, 51, globals.length);
     resize(0x14f1e, 10, 3);
     edit(0x14f51, [], globals);
-    const exports = ["godMode", "scoreMultiplier", "crashSaves"].flatMap((name, i) =>
-        [name.length, ...new TextEncoder().encode(name), 3, god + i]);
+    // Native functions from this build: GameControl wallet and plays getters,
+    // wallet setter (also refreshes the HUD), and Unity's integer preferences.
+    const bindings = [
+        ["godMode", 3, god], ["scoreMultiplier", 3, multiplier], ["crashSaves", 3, saves],
+        ["getGifts", 0, 25603], ["setGifts", 0, 25604], ["getPlays", 0, 25736],
+        ["getPreference", 0, 46438], ["setPreference", 0, 46435],
+        ["savePreferences", 0, 46445], ["initializeMetadata", 0, 64223]
+    ];
+    const exports = bindings.flatMap(([name, kind, index]) =>
+        [name.length, ...new TextEncoder().encode(name), kind, ...unsigned(index)]);
     resize(0x14f52, 0x3dad, exports.length);
-    resize(0x14f54, 548, 3);
+    resize(0x14f54, 548, bindings.length);
     edit(0x18d01, [], exports);
 
     // PlayerControl.Collision has just confirmed a lethal raycast here.
