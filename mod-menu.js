@@ -42,20 +42,28 @@
         fields.disabled = !p;
         if (!p) { byId("status").textContent = "Waiting for the game…"; return; }
         original = {gifts:p.engine.getGifts(0), plays:p.plays, best:p.engine.getPreference(p.bestKey, 0)};
-        for (const [id, value] of Object.entries(original)) byId(id).value = value;
+        for (const [id, value] of Object.entries(original)) {
+            byId(id).value = value;
+            byId(id).setCustomValidity("");
+        }
         byId("status").textContent = "";
     }
 
+    for (const field of fields.querySelectorAll("input")) {
+        field.addEventListener("focus", () => field.select());
+        field.addEventListener("input", () => field.setCustomValidity(
+            Number(field.value) > 2147483646 ? "Enter a value up to 2147483646." : ""));
+    }
     byId("stats").addEventListener("submit", event => {
         event.preventDefault();
         if (!enabled || !original || !fields.form.reportValidity()) return;
         const p = prefs();
         if (!p) return;
         // Only write edited fields. Normal play can change another stat while the menu is open.
-        const changed = id => byId(id).valueAsNumber !== original[id];
-        if (changed("gifts")) p.engine.setGifts(byId("gifts").valueAsNumber, 0);
-        if (changed("plays")) p.engine.setPreference(p.playsKey, byId("plays").valueAsNumber, 0);
-        if (changed("best")) p.engine.setPreference(p.bestKey, byId("best").valueAsNumber, 0);
+        const value = id => Number(byId(id).value);
+        if (value("gifts") !== original.gifts) p.engine.setGifts(value("gifts"), 0);
+        if (value("plays") !== original.plays) p.engine.setPreference(p.playsKey, value("plays"), 0);
+        if (value("best") !== original.best) p.engine.setPreference(p.bestKey, value("best"), 0);
         p.engine.savePreferences(0);
         loadStats();
         byId("status").textContent = "Stats saved";
@@ -103,6 +111,12 @@
     function clearKeys() { keys.clear(); chordUsed = false; sync(); }
     window.addEventListener("keydown", handleKey, true);
     window.addEventListener("keyup", handleKey, true);
+    // Keep Unity's keyboard listener from cancelling native text editing.
+    for (const type of ["keydown", "keypress", "keyup"]) {
+        window.addEventListener(type, event => {
+            if (menu.open && menu.contains(event.target)) event.stopImmediatePropagation();
+        }, true);
+    }
     window.addEventListener("blur", clearKeys);
     document.addEventListener("visibilitychange", () => { if (document.hidden) clearKeys(); });
     setInterval(sync, 250);

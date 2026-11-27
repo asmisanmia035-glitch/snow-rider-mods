@@ -51,6 +51,13 @@ function patchSnowRider(binary) {
     edit(collision + 38, deathBranch, [...deathBranch, ...shield]);
     resize(collision - 1, 106, shield.length);
 
+    // PlayerControl.Update ends the run for y < -10 or y > 10. Gate only
+    // the upper comparison; continue normal movement and stack cleanup.
+    const upperLimit = [0x43, 0, 0, 0x20, 0x41, 0x5e]; // f32.const 10; f32.gt
+    const unlessShielded = [0x23, god, 0x45, 0x71]; // && !godMode
+    edit(11554945, upperLimit, [...upperLimit, ...unlessShielded]);
+    resize(11554700, 328, unlessShielded.length);
+
     // PlayScore.AddScore adds this value to the distance score.
     const score = 11553101;
     const scoreBody = bytes.subarray(score, score + 253);
@@ -58,7 +65,7 @@ function patchSnowRider(binary) {
     const at = scoreBody.findIndex((_, i) => add.every((v, j) => v === scoreBody[i+j]));
     if (at < 0) throw Error("Score instruction missing");
     edit(score + at + 3, [0x41, 1], [0x23, multiplier]);
-    resize(0x6bb82, 0x1382b5a, shield.length);
+    resize(0x6bb82, 0x1382b5a, shield.length + unlessShielded.length);
 
     edits.sort((a,b) => a.offset - b.offset);
     const output = new Uint8Array(bytes.length + edits.reduce((n,e) =>

@@ -10,13 +10,7 @@
     <meta name="description" content="Snow Rider 3D, Snow Rider 3D Mathnook, Snow Rider 3D Unblocked">
     <meta property="og:image" content="snow-rider-3d.png" />
     <script src="TemplateData/UnityProgress.js"></script>
-    <script src="Build/UnityLoader.js"></script>
-    <script src="mod-engine.js"></script>
     <link rel="stylesheet" href="mod-menu.css">
-    <script src="mod-menu.js" defer></script>
-    <script>
-        var gameInstance = UnityLoader.instantiate("gameContainer", "Build/SnowRider3D-gd-1.json", { onProgress: UnityProgress, Module: { onRuntimeInitialized: function () { UnityProgress(gameInstance, "complete") } } });
-    </script>
 </head>
 
 <body style="overflow:hidden; margin:0; padding:0;">
@@ -28,9 +22,9 @@
         <form id="stats">
             <fieldset disabled>
                 <legend>Saved stats</legend>
-                <label>Presents <input id="gifts" type="number" min="0" max="2147483646" step="1" required></label>
-                <label>Rounds played <input id="plays" type="number" min="0" max="2147483646" step="1" required></label>
-                <label>High score <input id="best" type="number" min="0" max="2147483646" step="1" required></label>
+                <label>Presents <input id="gifts" inputmode="numeric" pattern="[0-9]+" required></label>
+                <label>Rounds played <input id="plays" inputmode="numeric" pattern="[0-9]+" required></label>
+                <label>High score <input id="best" inputmode="numeric" pattern="[0-9]+" required></label>
                 <button type="submit">Save stats</button>
             </fieldset>
             <output id="status" aria-live="polite"></output>
@@ -39,6 +33,12 @@
         <label>Goggles <select id="goggles"><option value="none">Clear</option><option value="sepia(.8) saturate(1.5)">Amber</option><option value="hue-rotate(105deg) saturate(1.6)">Aurora</option></select></label>
         <footer><output id="saves">Loading game…</output><kbd>R</kbd></footer>
     </dialog>
+    <script src="mod-menu.js?v=jump2"></script>
+    <script src="Build/UnityLoader.js"></script>
+    <script src="mod-engine.js?v=jump2"></script>
+    <script>
+        var gameInstance = UnityLoader.instantiate("gameContainer", "Build/SnowRider3D-gd-1.json", { onProgress: UnityProgress, Module: { onRuntimeInitialized: function () { UnityProgress(gameInstance, "complete") } } });
+    </script>
 </body>
 
 </html>
