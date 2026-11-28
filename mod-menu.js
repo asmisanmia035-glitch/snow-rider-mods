@@ -7,18 +7,64 @@
     let chordUsed = false;
     let original = null;
 
+    let view = "choose-role";
+    let generation = 0;
+
+    function showView(next) {
+        generation++;
+        view = next;
+        menu.dataset.view = next;
+        for (const id of ["choose-role", "unlock", "standard", "founder"]) byId(id).hidden = id !== next;
+        byId("change-role").hidden = next === "choose-role";
+        byId("mods-title").textContent = {standard:"Standard", founder:"Founder", unlock:"Founder access", "choose-role":"Choose a panel"}[next];
+        byId("code").value = "";
+        byId("code-status").textContent = "";
+        byId("points").value = byId("standard-points").value = "1";
+        byId("goggles").value = "none";
+        original = null;
+        sync();
+        if (next === "unlock") byId("code").focus();
+    }
+    byId("standard-role").onclick = () => showView("standard");
+    byId("founder-role").onclick = () => showView("unlock");
+    byId("change-role").onclick = () => showView("choose-role");
+    byId("unlock").onsubmit = async event => {
+        event.preventDefault();
+        if (!enabled || view !== "unlock") return;
+        const attempt = ++generation;
+        const encoder = new TextEncoder();
+        try {
+            const key = await crypto.subtle.importKey("raw", encoder.encode(byId("code").value), "PBKDF2", false, ["deriveBits"]);
+            const bits = await crypto.subtle.deriveBits({name:"PBKDF2", hash:"SHA-256", iterations:150000,
+                salt:encoder.encode("7c35821058ae02b1ef05997d8faf7f48")}, key, 256);
+            if (attempt !== generation || !menu.open) return;
+            const hash = Array.from(new Uint8Array(bits), byte => byte.toString(16).padStart(2, "0")).join("");
+            if (hash === "b36b1cf4ff8368ba1fd8985bc5864907e2e8f3787cc9665932fc460d9c71a37d") showView("founder");
+            else {
+                byId("code-status").textContent = "Incorrect passcode.";
+                byId("code").select();
+            }
+        } catch {
+            if (attempt === generation) byId("code-status").textContent = "Unable to check the passcode. Open the HTTPS game link.";
+        }
+    };
+
     function sync() {
         const engine = window.gameInstance?.Module?.asm;
         if (!engine?.godMode) return;
-        const protectedNow = enabled && !menu.open && (keys.has("ShiftLeft") || keys.has("ShiftRight"));
+        const founder = enabled && view === "founder";
+        const standard = enabled && view === "standard";
+        const protectedNow = (standard || founder) && !menu.open && (keys.has("ShiftLeft") || keys.has("ShiftRight"));
         engine.godMode.value = Number(protectedNow);
         const preset = byId("points").selectedOptions[0];
-        engine.scoreMultiplier.value = enabled ? Number(preset.value) : 1;
-        engine.speedMultiplier.value = enabled ? Number(preset.dataset.speed) : 1;
+        const standardValue = Number(byId("standard-points").value);
+        const limited = standard && [1, 3, 10].includes(standardValue) ? standardValue : 1;
+        engine.scoreMultiplier.value = founder ? Number(preset.value) : limited;
+        engine.speedMultiplier.value = founder ? Number(preset.dataset.speed) : limited;
         const scene = byId("gameContainer");
-        const lens = enabled ? byId("goggles").value : "none";
+        const lens = founder ? byId("goggles").value : "none";
         if (scene.dataset.lens !== lens) scene.dataset.lens = lens;
-        if (menu.open) {
+        if (founder && menu.open) {
             byId("saves").textContent = "Crashes saved · " + engine.crashSaves.value;
             if (!original) loadStats();
         }
@@ -60,7 +106,7 @@
     }
     byId("stats").addEventListener("submit", event => {
         event.preventDefault();
-        if (!enabled || !original || !fields.form.reportValidity()) return;
+        if (!enabled || view !== "founder" || !original || !fields.form.reportValidity()) return;
         const p = prefs();
         if (!p) return;
         // Only write edited fields. Normal play can change another stat while the menu is open.
@@ -75,6 +121,7 @@
     menu.addEventListener("change", sync);
     byId("close-mods").onclick = () => menu.close();
     menu.addEventListener("close", () => {
+        if (view === "unlock") showView("choose-role");
         original = null;
         document.querySelector("canvas")?.focus();
         sync();
@@ -85,7 +132,8 @@
         const shortcut = code === "KeyR" || code === "KeyF";
         if (!shortcut && code !== "ShiftLeft" && code !== "ShiftRight") return;
         if (event.type === "keydown" && (event.ctrlKey || event.altKey || event.metaKey)) return;
-        if (shortcut) {
+        const typingCode = event.target === byId("code");
+        if (shortcut && !typingCode) {
             event.preventDefault();
             event.stopImmediatePropagation();
         }
@@ -97,14 +145,13 @@
                 enabled = !enabled;
                 if (!enabled) {
                     if (menu.open) menu.close();
-                    byId("points").value = "1";
-                    byId("goggles").value = "none";
+                    showView("choose-role");
                 }
             }
         } else {
             if (!keys.delete(code)) return;
             // Decide on release so R-first chords never flash the dialog.
-            if (code === "KeyR" && !chordUsed && enabled) {
+            if (code === "KeyR" && !typingCode && !chordUsed && enabled) {
                 if (menu.open) menu.close();
                 else { original = null; menu.showModal(); }
             }
@@ -123,5 +170,6 @@
     }
     window.addEventListener("blur", clearKeys);
     document.addEventListener("visibilitychange", () => { if (document.hidden) clearKeys(); });
+    showView("choose-role");
     setInterval(sync, 250);
 })();

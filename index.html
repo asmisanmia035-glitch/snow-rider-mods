@@ -10,7 +10,7 @@
     <meta name="description" content="Snow Rider 3D, Snow Rider 3D Mathnook, Snow Rider 3D Unblocked">
     <meta property="og:image" content="snow-rider-3d.png" />
     <script src="TemplateData/UnityProgress.js"></script>
-    <link rel="stylesheet" href="mod-menu.css?v=lenses">
+    <link rel="stylesheet" href="mod-menu.css?v=roles-1">
 </head>
 
 <body style="overflow:hidden; margin:0; padding:0;">
@@ -19,6 +19,22 @@
     </div>
     <dialog id="mods" aria-labelledby="mods-title">
         <header><h1 id="mods-title">Sled mods</h1><button id="close-mods" aria-label="Close mod menu">×</button></header>
+        <section id="choose-role" aria-label="Choose a panel">
+            <button id="standard-role">Standard panel</button>
+            <button id="founder-role">Founder panel</button>
+        </section>
+        <form id="unlock" hidden>
+            <label>Founder passcode <input id="code" type="password" autocomplete="off" required></label>
+            <button>Unlock founder panel</button>
+            <output id="code-status" aria-live="polite"></output>
+        </form>
+        <section id="standard" hidden>
+            <label>Points and speed
+                <select id="standard-points"><option value="1">1×</option><option value="3">3×</option><option value="10">10×</option></select>
+            </label>
+            <p>Hold <kbd>Shift</kbd> for god mode.</p>
+        </section>
+        <section id="founder" hidden>
         <form id="stats">
             <fieldset disabled>
                 <legend>Saved stats</legend>
@@ -42,8 +58,10 @@
             </select>
         </label>
         <footer><output id="saves">Loading game…</output><kbd>R</kbd></footer>
+        </section>
+        <button id="change-role" hidden>Choose another panel</button>
     </dialog>
-    <script src="mod-menu.js?v=travel-1"></script>
+    <script src="mod-menu.js?v=roles-1"></script>
     <script src="Build/UnityLoader.js"></script>
     <script src="mod-engine.js?v=travel-1"></script>
     <script>

@@ -40,3 +40,17 @@
 @media (prefers-reduced-motion:reduce) {
     #gameContainer[data-lens]::after { animation:none; }
 }
+
+#mods [hidden] { display:none; }
+#choose-role { display:grid; gap:10px; }
+#mods #change-role { margin-top:14px; font-size:14px; }
+#code-status { display:block; margin-top:6px; color:#ffc5bf; }
+#mods[data-view="founder"] h1 {
+    font:italic 900 24px/1.15 "Arial Black",system-ui,sans-serif;
+    letter-spacing:.08em; text-transform:uppercase; color:#8cf4ff;
+    text-shadow:0 0 12px #75dcff55; animation:founder-colour 5s linear infinite;
+}
+@keyframes founder-colour { to { filter:hue-rotate(360deg); } }
+@media (prefers-reduced-motion:reduce) {
+    #mods[data-view="founder"] h1 { animation:none; }
+}
