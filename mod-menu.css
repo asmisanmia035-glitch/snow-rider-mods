@@ -11,3 +11,32 @@
 #mods form button { margin-top:10px; }
 #mods #status { font-size:13px; }
 #mods footer { margin-top:14px; font-size:13px; color:#b9dfed; }
+
+#gameContainer { position:relative; isolation:isolate; }
+#gameContainer[data-lens="amber"] canvas { filter:sepia(.8) saturate(1.5); }
+#gameContainer[data-lens="aurora"] canvas { filter:hue-rotate(105deg) saturate(1.6); }
+#gameContainer[data-lens="rainbow"]::after,
+#gameContainer[data-lens="galaxy"]::after {
+    content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+}
+#gameContainer[data-lens="rainbow"]::after {
+    background:linear-gradient(115deg,#ff5687,#ffb84b,#ebeb69,#46e6ae,#4dbfff,#aa75ff,#ff5687);
+    mix-blend-mode:multiply; opacity:.68;
+    animation:spectrum 9s linear infinite;
+}
+@keyframes spectrum { to { filter:hue-rotate(360deg); } }
+#gameContainer[data-lens="galaxy"] canvas { filter:grayscale(.65) brightness(.75) contrast(1.12); }
+#gameContainer[data-lens="galaxy"]::after {
+    background:
+        radial-gradient(circle at 17% 24%,#fff 0 .7px,transparent 1.4px) 0 0 / 103px 79px,
+        radial-gradient(circle at 63% 51%,#bcecff 0 1px,transparent 1.8px) 0 0 / 167px 149px,
+        radial-gradient(ellipse at 18% 8%,#00bcc28a,transparent 55%),
+        linear-gradient(145deg,#24104470 14%,#6c38b383 42%,#f27abb64 49%,#37389a86 58%,#14295690 85%);
+    animation:stardrift 30s linear infinite;
+}
+@keyframes stardrift {
+    to { background-position:103px -79px,-167px 149px,0 0,0 0; }
+}
+@media (prefers-reduced-motion:reduce) {
+    #gameContainer[data-lens]::after { animation:none; }
+}

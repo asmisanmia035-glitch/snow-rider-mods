@@ -23,10 +23,10 @@ function patchSnowRider(binary) {
         edit(offset, unsigned(original), unsigned(original + delta));
     }
     // Seven imported globals precede ten defined globals.
-    const god = 17, multiplier = 18, saves = 19;
-    const globals = [0, 1, 0].flatMap(initial => [0x7f, 1, 0x41, initial, 0x0b]);
+    const god = 17, multiplier = 18, saves = 19, distancePoints = 20;
+    const globals = [0, 1, 0, 0].flatMap(initial => [0x7f, 1, 0x41, initial, 0x0b]);
     resize(0x14f1d, 51, globals.length);
-    resize(0x14f1e, 10, 3);
+    resize(0x14f1e, 10, 4);
     edit(0x14f51, [], globals);
     // Native functions from this build: GameControl wallet and plays getters,
     // wallet setter (also refreshes the HUD), and Unity's integer preferences.
@@ -64,8 +64,21 @@ function patchSnowRider(binary) {
     const add = [0x28, 2, 36, 0x41, 1, 0x6a, 0x36, 2, 36];
     const at = scoreBody.findIndex((_, i) => add.every((v, j) => v === scoreBody[i+j]));
     if (at < 0) throw Error("Score instruction missing");
-    edit(score + at + 3, [0x41, 1], [0x23, multiplier]);
-    resize(0x6bb82, 0x1382b5a, shield.length + unlessShielded.length);
+    // The native speed curve also reads the score. Feed it the unboosted
+    // point count so a million-point award doesn't launch the sled.
+    const resetDistance = [0x41, 0, 0x24, distancePoints];
+    const zeroScore = [0x41, 0, 0x36, 2, 36];
+    edit(11534999, zeroScore, [...zeroScore, ...resetDistance]);
+    resize(11534831, 204, resetDistance.length);
+    edit(11556052, [0x28, 2, 36], [0x1a, 0x23, distancePoints]);
+    const tick = [0x23, distancePoints, 0x41, 1, 0x6a, 0x24, distancePoints];
+    // Widen before adding, then saturate at the game's signed 32-bit maximum.
+    const award = [0xb7, 0x23, multiplier, 0xb7, 0xa0, 0xfc, 2];
+    const oldAward = [0x41, 1, 0x6a];
+    edit(score + at + 3, oldAward, [...tick, ...award]);
+    const scoreGrowth = tick.length + award.length - oldAward.length;
+    resize(score - 2, 253, scoreGrowth);
+    resize(0x6bb82, 0x1382b5a, shield.length + unlessShielded.length + resetDistance.length + scoreGrowth);
 
     edits.sort((a,b) => a.offset - b.offset);
     const output = new Uint8Array(bytes.length + edits.reduce((n,e) =>

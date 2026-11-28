@@ -10,7 +10,7 @@
     <meta name="description" content="Snow Rider 3D, Snow Rider 3D Mathnook, Snow Rider 3D Unblocked">
     <meta property="og:image" content="snow-rider-3d.png" />
     <script src="TemplateData/UnityProgress.js"></script>
-    <link rel="stylesheet" href="mod-menu.css">
+    <link rel="stylesheet" href="mod-menu.css?v=lenses">
 </head>
 
 <body style="overflow:hidden; margin:0; padding:0;">
@@ -29,13 +29,23 @@
             </fieldset>
             <output id="status" aria-live="polite"></output>
         </form>
-        <label>Score multiplier <select id="points"><option value="1">1×</option><option value="3">3×</option><option value="10">10×</option></select></label>
-        <label>Goggles <select id="goggles"><option value="none">Clear</option><option value="sepia(.8) saturate(1.5)">Amber</option><option value="hue-rotate(105deg) saturate(1.6)">Aurora</option></select></label>
+        <label>Score multiplier
+            <select id="points">
+                <option value="1">1×</option><option value="3">3×</option><option value="10">10×</option>
+                <option value="100">100×</option><option value="1000">1,000×</option><option value="1000000">1,000,000×</option>
+            </select>
+        </label>
+        <label>Goggles
+            <select id="goggles">
+                <option value="none">Clear</option><option value="amber">Amber</option><option value="aurora">Aurora</option>
+                <option value="rainbow">Rainbow</option><option value="galaxy">Galaxy</option>
+            </select>
+        </label>
         <footer><output id="saves">Loading game…</output><kbd>R</kbd></footer>
     </dialog>
-    <script src="mod-menu.js?v=jump2"></script>
+    <script src="mod-menu.js?v=lenses"></script>
     <script src="Build/UnityLoader.js"></script>
-    <script src="mod-engine.js?v=jump2"></script>
+    <script src="mod-engine.js?v=lenses"></script>
     <script>
         var gameInstance = UnityLoader.instantiate("gameContainer", "Build/SnowRider3D-gd-1.json", { onProgress: UnityProgress, Module: { onRuntimeInitialized: function () { UnityProgress(gameInstance, "complete") } } });
     </script>

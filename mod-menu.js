@@ -13,7 +13,9 @@
         const protectedNow = enabled && !menu.open && (keys.has("ShiftLeft") || keys.has("ShiftRight"));
         engine.godMode.value = Number(protectedNow);
         engine.scoreMultiplier.value = enabled ? Number(byId("points").value) : 1;
-        byId("gameContainer").style.filter = enabled ? byId("goggles").value : "none";
+        const scene = byId("gameContainer");
+        const lens = enabled ? byId("goggles").value : "none";
+        if (scene.dataset.lens !== lens) scene.dataset.lens = lens;
         if (menu.open) {
             byId("saves").textContent = "Crashes saved · " + engine.crashSaves.value;
             if (!original) loadStats();
