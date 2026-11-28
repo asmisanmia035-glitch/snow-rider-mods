@@ -29,10 +29,10 @@
             </fieldset>
             <output id="status" aria-live="polite"></output>
         </form>
-        <label>Score multiplier
+        <label>Points / sled speed
             <select id="points">
-                <option value="1">1×</option><option value="3">3×</option><option value="10">10×</option>
-                <option value="100">100×</option><option value="1000">1,000×</option><option value="1000000">1,000,000×</option>
+                <option value="1" data-speed="1">1× / 1×</option><option value="3" data-speed="2">3× / 2×</option><option value="10" data-speed="3">10× / 3×</option>
+                <option value="100" data-speed="4">100× / 4×</option><option value="1000" data-speed="6">1,000× / 6×</option><option value="1000000" data-speed="10">1,000,000× / 10×</option>
             </select>
         </label>
         <label>Goggles
@@ -43,9 +43,9 @@
         </label>
         <footer><output id="saves">Loading game…</output><kbd>R</kbd></footer>
     </dialog>
-    <script src="mod-menu.js?v=lenses"></script>
+    <script src="mod-menu.js?v=travel-1"></script>
     <script src="Build/UnityLoader.js"></script>
-    <script src="mod-engine.js?v=score-speed"></script>
+    <script src="mod-engine.js?v=travel-1"></script>
     <script>
         var gameInstance = UnityLoader.instantiate("gameContainer", "Build/SnowRider3D-gd-1.json", { onProgress: UnityProgress, Module: { onRuntimeInitialized: function () { UnityProgress(gameInstance, "complete") } } });
     </script>

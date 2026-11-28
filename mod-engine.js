@@ -23,15 +23,16 @@ function patchSnowRider(binary) {
         edit(offset, unsigned(original), unsigned(original + delta));
     }
     // Seven imported globals precede ten defined globals.
-    const god = 17, multiplier = 18, saves = 19;
-    const globals = [0, 1, 0].flatMap(initial => [0x7f, 1, 0x41, initial, 0x0b]);
+    const god = 17, multiplier = 18, saves = 19, distancePoints = 20, speed = 21;
+    const globals = [0, 1, 0, 0, 1].flatMap(initial => [0x7f, 1, 0x41, initial, 0x0b]);
     resize(0x14f1d, 51, globals.length);
-    resize(0x14f1e, 10, 3);
+    resize(0x14f1e, 10, 5);
     edit(0x14f51, [], globals);
     // Native functions from this build: GameControl wallet and plays getters,
     // wallet setter (also refreshes the HUD), and Unity's integer preferences.
     const bindings = [
         ["godMode", 3, god], ["scoreMultiplier", 3, multiplier], ["crashSaves", 3, saves],
+        ["speedMultiplier", 3, speed],
         ["getGifts", 0, 25603], ["setGifts", 0, 25604], ["getPlays", 0, 25736],
         ["getPreference", 0, 46438], ["setPreference", 0, 46435],
         ["savePreferences", 0, 46445], ["initializeMetadata", 0, 64223]
@@ -64,15 +65,27 @@ function patchSnowRider(binary) {
     const add = [0x28, 2, 36, 0x41, 1, 0x6a, 0x36, 2, 36];
     const at = scoreBody.findIndex((_, i) => add.every((v, j) => v === scoreBody[i+j]));
     if (at < 0) throw Error("Score instruction missing");
-    // Leave PlayerControl.Position's read of the live score intact so the
-    // native acceleration curve follows the same points shown on screen.
+    // The native speed curve also reads the score. Feed it the unboosted
+    // point count so a million-point award doesn't launch the sled.
+    const resetDistance = [0x41, 0, 0x24, distancePoints];
+    const zeroScore = [0x41, 0, 0x36, 2, 36];
+    edit(11534999, zeroScore, [...zeroScore, ...resetDistance]);
+    resize(11534831, 204, resetDistance.length);
+    edit(11556052, [0x28, 2, 36], [0x1a, 0x23, distancePoints]);
+    // Scale the velocity that Position uses to build this frame's displacement.
+    // Keep the stored velocity at its natural value so switching is immediate.
+    const readVelocity = [0x20, 0, 0x2a, 2, 60];
+    const scaleVelocity = [0x23, speed, 0xb2, 0x94]; // global.get; f32.convert_i32_s; f32.mul
+    edit(11556358, readVelocity, [...readVelocity, ...scaleVelocity]);
+    resize(11555919, 755, scaleVelocity.length);
+    const tick = [0x23, distancePoints, 0x41, 1, 0x6a, 0x24, distancePoints];
     // Widen before adding, then saturate at the game's signed 32-bit maximum.
     const award = [0xb7, 0x23, multiplier, 0xb7, 0xa0, 0xfc, 2];
     const oldAward = [0x41, 1, 0x6a];
-    edit(score + at + 3, oldAward, award);
-    const scoreGrowth = award.length - oldAward.length;
+    edit(score + at + 3, oldAward, [...tick, ...award]);
+    const scoreGrowth = tick.length + award.length - oldAward.length;
     resize(score - 2, 253, scoreGrowth);
-    resize(0x6bb82, 0x1382b5a, shield.length + unlessShielded.length + scoreGrowth);
+    resize(0x6bb82, 0x1382b5a, shield.length + unlessShielded.length + resetDistance.length + scoreGrowth + scaleVelocity.length);
 
     edits.sort((a,b) => a.offset - b.offset);
     const output = new Uint8Array(bytes.length + edits.reduce((n,e) =>

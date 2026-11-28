@@ -12,7 +12,9 @@
         if (!engine?.godMode) return;
         const protectedNow = enabled && !menu.open && (keys.has("ShiftLeft") || keys.has("ShiftRight"));
         engine.godMode.value = Number(protectedNow);
-        engine.scoreMultiplier.value = enabled ? Number(byId("points").value) : 1;
+        const preset = byId("points").selectedOptions[0];
+        engine.scoreMultiplier.value = enabled ? Number(preset.value) : 1;
+        engine.speedMultiplier.value = enabled ? Number(preset.dataset.speed) : 1;
         const scene = byId("gameContainer");
         const lens = enabled ? byId("goggles").value : "none";
         if (scene.dataset.lens !== lens) scene.dataset.lens = lens;
